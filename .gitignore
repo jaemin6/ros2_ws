@@ -1,0 +1,18 @@
+# ROS 2 Build/Install artifacts
+build/
+install/
+log/
+
+# Python virtual environment
+.venv/
+venv/
+
+# IDE files (VS Code)
+.vscode/
+
+# Gazebo/Simulation related files
+*.bag
+*.pgm
+*.yaml
+
+# etc...
