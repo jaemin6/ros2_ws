@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<robot name="dofbot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:property name="PI" value="3.14159265359"/>
+    <xacro:property name="link_width" value="0.04"/> <link name="manipulator_base_link">
+        <visual>
+            <geometry><box size="0.1 0.1 0.01"/></geometry>
+        </visual>
+        <collision><geometry><box size="0.1 0.1 0.01"/></geometry></collision>
+        <inertial>
+            <mass value="0.5"/>
+            <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+        </inertial>
+    </link>
+
+    <joint name="joint1" type="revolute">
+        <parent link="manipulator_base_link"/>
+        <child link="link1"/>
+        <origin xyz="0 0 0.05" rpy="0 0 0"/> 
+        <axis xyz="0 0 1"/> <limit lower="-${PI}" upper="${PI}" velocity="0.5" effort="10.0"/>
+    </joint>
+    
+    <joint name="joint2" type="revolute">
+        <parent link="link1"/>
+        <child link="link2"/>
+        <origin xyz="0 0 0.1" rpy="0 0 0"/> 
+        <axis xyz="0 1 0"/> <limit lower="-1.57" upper="1.57" velocity="0.5" effort="10.0"/> </joint>
+
+    </robot>
