@@ -24,3 +24,13 @@ if(BUILD_TESTING)
 endif()
 
 ament_package()
+
+# 런치 파일을 설치하는 명령어 추가
+install(DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}
+)
+
+# 월드 파일을 설치하는 명령어 추가
+install(DIRECTORY world
+  DESTINATION share/${PROJECT_NAME}
+)

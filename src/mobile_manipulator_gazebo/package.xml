@@ -3,13 +3,13 @@
 <package format="3">
   <name>mobile_manipulator_gazebo</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <description>Gazebo simulation and launch files for the mobile manipulator project.</description>
   <maintainer email="gumt555@gmail.com">jemini</maintainer>
-  <license>TODO: License declaration</license>
+  <license>Apache-2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <test_depend>ament_lint_auto</test_depend>
+  <depend>rclpy</depend>                  <depend>launch</depend>                 <depend>gazebo_ros</depend>              <depend>turtlebot3_gazebo</depend>      <depend>turtlebot3_description</depend> <depend>ros2_control</depend>           <depend>ros2_controllers</depend>        <depend>mobile_manipulator_description</depend> <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 
   <export>
