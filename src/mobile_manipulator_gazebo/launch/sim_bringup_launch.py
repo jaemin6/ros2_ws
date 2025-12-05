@@ -13,21 +13,17 @@ def generate_launch_description():
     pkg_turtlebot_gazebo = get_package_share_directory('turtlebot3_gazebo')
     
     # ------------------- 1. Launch Arguments 선언 -------------------
-    # GUI 실행 여부를 인수로 받습니다. 기본값은 False로 설정하여 GUI를 끕니다.
     gui_arg = DeclareLaunchArgument(
         'gui',
-        default_value='false',  # <--- 수정: 기본값을 'false'로 설정
+        default_value='false',
         description='Set to "true" to run with Gazebo GUI.'
     )
-    
-    # 월드 파일 경로 인수 선언
     world_arg = DeclareLaunchArgument(
         'world_name',
         default_value=os.path.join(get_package_share_directory(pkg_gazebo), 'world', 'empty.world'),
         description='Gazebo world file'
     )
 
-    # LaunchConfiguration 객체 생성
     gui_config = LaunchConfiguration('gui')
     world_config = LaunchConfiguration('world_name')
 
@@ -38,7 +34,6 @@ def generate_launch_description():
         'mobile_manipulator.urdf.xacro'
     )
 
-    # Rviz 시각화 및 Gazebo 스폰을 위해 URDF를 XML로 변환 (파일 생성)
     robot_description = ExecuteProcess(
         cmd=['xacro', xacro_file, '>', '/tmp/robot_description.urdf'],
         shell=True,
@@ -46,14 +41,13 @@ def generate_launch_description():
     )
     
     # ------------------- 3. Gazebo 서버 실행 -------------------
-    # turtlebot3_gazebo의 empty_world.launch.py를 호출하며 gui 인수를 전달합니다.
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(pkg_turtlebot_gazebo, 'launch', 'empty_world.launch.py')
         ),
         launch_arguments={
             'world': world_config,
-            'gui': gui_config  # <--- 수정: gui 인수를 전달
+            'gui': gui_config
         }.items()
     )
 
@@ -69,39 +63,41 @@ def generate_launch_description():
         output='screen'
     )
 
-    # ------------------- 5. Robot State Publisher -------------------
-    # robot_state_publisher_node = Node(
-    #     package='robot_state_publisher',
-    #     executable='robot_state_publisher',
-    #     parameters=[{'robot_description': xacro_file}], # URDF 파일 경로를 직접 전달하거나,
-    #     # parameters=[{'robot_description': Command(['xacro ', xacro_file])}],
-    #     output='screen'
-    # )
-    # 참고: 이전 로그에서 robot_state_publisher는 정상적으로 실행되었으므로 코드를 유지하거나 주석처리합니다.
-    
-    # ------------------- 6. Controller Manager 및 제어기 로드 -------------------
-    # 제어기 로드 명령은 spawn_entity가 성공적으로 시작된 이후에 실행되도록 합니다.
-    
+    # ------------------- 5. Controller Manager 노드 실행 (추가) -------------------
+    # ⚠️ 수정 1: Controller Manager를 실행하는 노드 추가
+    # mobile_manipulator_gazebo/config/ 디렉토리에 컨트롤러 설정 파일이 있다고 가정합니다.
+    controller_config = os.path.join(
+        get_package_share_directory(pkg_name),
+        'config',
+        'mobile_manipulator_controllers.yaml' # <--- 실제 YAML 파일명 확인 후 필요시 수정
+    )
+
+    control_node = Node(
+        package='controller_manager',
+        executable='ros2_control_node',
+        parameters=[controller_config],
+        output='screen'
+    )
+    # -------------------------------------------------------------------
+
+    # ------------------- 6. Controller 로드 명령 -------------------
     load_joint_state_controller = ExecuteProcess(
         cmd=['ros2', 'control', 'load_controller', '--set-state', 'active',
              'joint_state_broadcaster'],
         output='screen',
-        # spawn_entity 노드의 시작을 기다립니다.
-        #on_action_start=[spawn_entity] 
+        # on_action_start 인수는 제거된 상태 유지
     )
 
     load_diff_drive_controller = ExecuteProcess(
         cmd=['ros2', 'control', 'load_controller', '--set-state', 'active',
              'diff_cont'],
         output='screen',
-        #on_action_start=[spawn_entity]
     )
     
     load_arm_controller = ExecuteProcess(
         cmd=['ros2', 'control', 'load_controller', '--set-state', 'active',
              'joint_trajectory_controller'],
         output='screen',
-        #on_action_start=[spawn_entity]
     )
 
     return LaunchDescription([
@@ -112,17 +108,19 @@ def generate_launch_description():
         # 2. URDF 변환
         robot_description,
         
-        # 3. Gazebo 실행 (gzclient 비활성화)
+        # 3. Gazebo 실행 (gzserver만 실행)
         gazebo,
         
         # 4. 로봇 스폰
         spawn_entity,
         
-        # 5. Controller 로드 (spawn 이후)
+        # 5. Controller Manager 노드 실행 <--- 이 순서가 중요합니다!
+        control_node, 
+
+        # 6. Controller 로드 (이제 control_node가 서비스를 제공합니다)
         load_joint_state_controller,
         load_diff_drive_controller,
         load_arm_controller
         
-        # 참고: robot_state_publisher 노드가 누락된 경우 여기에 추가해야 합니다.
-        # robot_state_publisher_node,
+        # robot_state_publisher 노드는 gzserver를 포함하는 launch 파일에서 이미 실행되고 있을 가능성이 높습니다.
     ])
