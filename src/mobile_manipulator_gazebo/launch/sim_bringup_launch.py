@@ -69,7 +69,7 @@ def generate_launch_description():
     controller_config = os.path.join(
         get_package_share_directory(pkg_name),
         'config',
-        'mobile_manipulator_controllers.yaml' # <--- 실제 YAML 파일명 확인 후 필요시 수정
+        'controller_manager.yaml' # <--- 실제 YAML 파일명 확인 후 필요시 수정
     )
 
     control_node = Node(
