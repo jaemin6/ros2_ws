@@ -1,12 +1,20 @@
 <?xml version="1.0"?>
 <robot name="mobile_manipulator" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
+    <!-- ========================================================= -->
+    <!--  ROS2 Control System (Mobile Base + DOFbot Arm)          -->
+    <!-- ========================================================= -->
     <xacro:macro name="mobile_manipulator_ros2_control" params="name">
         <ros2_control name="${name}" type="system">
+
+            <!-- Gazebo ros2_control plugin -->
             <hardware>
                 <plugin>gazebo_ros2_control/GazeboSystem</plugin>
             </hardware>
 
+            <!-- ========================= -->
+            <!-- 1. TB3 Base Wheel Joints -->
+            <!-- ========================= -->
             <joint name="wheel_left_joint">
                 <command_interface name="velocity">
                     <param name="min">-10</param>
@@ -15,6 +23,7 @@
                 <state_interface name="velocity"/>
                 <state_interface name="position"/>
             </joint>
+
             <joint name="wheel_right_joint">
                 <command_interface name="velocity">
                     <param name="min">-10</param>
@@ -24,6 +33,9 @@
                 <state_interface name="position"/>
             </joint>
 
+            <!-- ========================= -->
+            <!-- 2. DOFbot Manipulator     -->
+            <!-- ========================= -->
             <joint name="joint1">
                 <command_interface name="position">
                     <param name="min">-3.14</param>
@@ -32,9 +44,19 @@
                 <state_interface name="position"/>
                 <state_interface name="velocity"/>
             </joint>
-            </ros2_control>
-        
+
+            <joint name="joint2">
+                <command_interface name="position">
+                    <param name="min">-1.57</param>
+                    <param name="max">1.57</param>
+                </command_interface>
+                <state_interface name="position"/>
+                <state_interface name="velocity"/>
+            </joint>
+
+        </ros2_control>
     </xacro:macro>
-    
+
+    <!-- Macro 실행 -->
     <xacro:mobile_manipulator_ros2_control name="MobileManipulator"/>
 </robot>
