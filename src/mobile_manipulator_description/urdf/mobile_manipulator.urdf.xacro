@@ -1,16 +1,16 @@
 <?xml version="1.0"?>
 <robot name="mobile_manipulator" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-    <xacro:property name="PI" value="3.14159265359"/>
+  <!-- Include TB3 + DOFBOT -->
+  <xacro:include filename="$(find turtlebot3_description)/urdf/turtlebot3_waffle_pi.urdf."/>
+  <xacro:include filename="$(find mobile_manipulator_description)/urdf/dofbot.urdf.xacro"/>
 
-    <xacro:include filename="$(find turtlebot3_description)/urdf/turtlebot3_waffle_pi.urdf"/>
-    
-    <xacro:include filename="$(find mobile_manipulator_description)/urdf/dofbot.urdf.xacro"/>
+  <!-- ros2_control 설정 매크로 호출 -->
+  <xacro:mobile_manipulator_ros2_control name="MobileManipulator"/>
 
-    <joint name="manipulator_base_joint" type="fixed">
-        <parent link="base_link"/> <child link="manipulator_base_link"/> <origin xyz="0.0 0.0 0.15" rpy="0 0 0"/> 
-    </joint>
-    
-    <xacro:include filename="$(find mobile_manipulator_description)/ros2_control/mobile_manipulator.ros2_control.xacro"/>
+  <!-- Gazebo ros2_control plugin -->
+  <gazebo>
+    <plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so"/>
+  </gazebo>
 
 </robot>
