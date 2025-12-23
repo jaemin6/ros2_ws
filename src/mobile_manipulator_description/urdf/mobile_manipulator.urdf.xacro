@@ -1,16 +1,65 @@
 <?xml version="1.0"?>
 <robot name="mobile_manipulator" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <!-- Include TB3 + DOFBOT -->
-  <xacro:include filename="$(find turtlebot3_description)/urdf/turtlebot3_waffle_pi.urdf."/>
+  <!-- ================== Include Models ================== -->
+  <xacro:include filename="$(find turtlebot3_description)/urdf/turtlebot3_waffle_pi.urdf"/>
   <xacro:include filename="$(find mobile_manipulator_description)/urdf/dofbot.urdf.xacro"/>
 
-  <!-- ros2_control 설정 매크로 호출 -->
-  <xacro:mobile_manipulator_ros2_control name="MobileManipulator"/>
+  <!-- ================== Mount DOFBOT ================== -->
+  <joint name="dofbot_on_tb3" type="fixed">
+    <parent link="base_link"/>
+    <child link="manipulator_base_link"/>
+    <origin xyz="0 0 0.20" rpy="0 0 0"/>
+  </joint>
 
-  <!-- Gazebo ros2_control plugin -->
+  <!-- ================== Gazebo Physics ================== -->
   <gazebo>
     <plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so"/>
+  </gazebo>
+
+  <!-- ================== Lidar ================== -->
+  <gazebo reference="base_scan">
+    <sensor name="lidar" type="ray">
+      <update_rate>10</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>360</samples>
+            <min_angle>-3.14</min_angle>
+            <max_angle>3.14</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.12</min>
+          <max>3.5</max>
+        </range>
+      </ray>
+      <plugin name="lidar_plugin" filename="libgazebo_ros_ray_sensor.so">
+        <topicName>scan</topicName>
+        <frameName>base_scan</frameName>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <!-- ================== Camera ================== -->
+  <gazebo reference="camera_link">
+    <sensor name="camera" type="camera">
+      <update_rate>30</update_rate>
+      <camera>
+        <horizontal_fov>1.396</horizontal_fov>
+        <image>
+          <width>640</width>
+          <height>480</height>
+          <format>R8G8B8</format>
+        </image>
+      </camera>
+      <plugin name="camera_plugin" filename="libgazebo_ros_camera.so">
+        <cameraName>camera</cameraName>
+        <imageTopicName>image_raw</imageTopicName>
+        <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+        <frameName>camera_link</frameName>
+      </plugin>
+    </sensor>
   </gazebo>
 
 </robot>

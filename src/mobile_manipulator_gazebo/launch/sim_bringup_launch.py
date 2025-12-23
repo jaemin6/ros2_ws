@@ -10,7 +10,6 @@ from launch_ros.substitutions import FindPackageShare
 from launch.conditions import IfCondition, UnlessCondition
 
 
-
 def generate_launch_description():
 
     pkg_desc = 'mobile_manipulator_description'
@@ -52,7 +51,7 @@ def generate_launch_description():
         value_type=str
     )
 
-    # ---------------------- gazebo server ----------------------
+    # ---------------------- GAZEBO SERVER (항상 실행) ----------------------
     gazebo_server = ExecuteProcess(
         cmd=[
             'gzserver',
@@ -61,14 +60,14 @@ def generate_launch_description():
             '-s', 'libgazebo_ros_factory.so',
             '--verbose'
         ],
-        output='screen',
-        condition=UnlessCondition(LaunchConfiguration('gui'))
+        output='screen'
     )
 
+    # ---------------------- GAZEBO CLIENT (GUI일 때만) ----------------------
     gazebo_client = ExecuteProcess(
         cmd=['gzclient'],
         output='screen',
-        condition=IfCondition(LaunchConfiguration('gui'))
+        condition=IfCondition(gui)
     )
 
     # ---------------------- robot_state_publisher ----------------------
@@ -79,22 +78,22 @@ def generate_launch_description():
         output='screen'
     )
 
-    # ---------------------- controller manager ----------------------
-    controller_yml = os.path.join(
-        get_package_share_directory(pkg_desc),
-        'config',
-        'controller_manager.yaml'
-    )
-
-    control_node = Node(
-        package='controller_manager',
-        executable='ros2_control_node',
-        parameters=[
-            {'robot_description': robot_description},
-            controller_yml
-        ],
-        output='screen'
-    )
+    # ---------------------- controller manager (주석 처리) ----------------------
+    # controller_yml = os.path.join(
+    #     get_package_share_directory(pkg_desc),
+    #     'config',
+    #     'controller_manager.yaml'
+    # )
+    #
+    # control_node = Node(
+    #     package='controller_manager',
+    #     executable='ros2_control_node',
+    #     parameters=[
+    #         {'robot_description': robot_description},
+    #         controller_yml
+    #     ],
+    #     output='screen'
+    # )
 
     # ---------------------- spawn robot ----------------------
     spawn_entity = Node(
@@ -107,24 +106,24 @@ def generate_launch_description():
         output='screen'
     )
 
-    # ---------------------- load controllers ----------------------
-    load_joint_state = ExecuteProcess(
-        cmd=['ros2', 'control', 'load_controller',
-             '--set-state', 'active', 'joint_state_broadcaster'],
-        output='screen'
-    )
-
-    load_diff = ExecuteProcess(
-        cmd=['ros2', 'control', 'load_controller',
-             '--set-state', 'active', 'diff_cont'],
-        output='screen'
-    )
-
-    load_arm = ExecuteProcess(
-        cmd=['ros2', 'control', 'load_controller',
-             '--set-state', 'active', 'joint_trajectory_controller'],
-        output='screen'
-    )
+    # ---------------------- load controllers (주석 처리) ----------------------
+    # load_joint_state = ExecuteProcess(
+    #     cmd=['ros2', 'control', 'load_controller',
+    #          '--set-state', 'active', 'joint_state_broadcaster'],
+    #     output='screen'
+    # )
+    #
+    # load_diff = ExecuteProcess(
+    #     cmd=['ros2', 'control', 'load_controller',
+    #          '--set-state', 'active', 'diff_cont'],
+    #     output='screen'
+    # )
+    #
+    # load_arm = ExecuteProcess(
+    #     cmd=['ros2', 'control', 'load_controller',
+    #          '--set-state', 'active', 'joint_trajectory_controller'],
+    #     output='screen'
+    # )
 
     return LaunchDescription([
         gui_arg,
@@ -132,9 +131,9 @@ def generate_launch_description():
         gazebo_server,
         gazebo_client,
         robot_state_pub,
-        control_node,
+        # control_node,     # 주석 처리됨
         spawn_entity,
-        load_joint_state,
-        load_diff,
-        load_arm
+        # load_joint_state,
+        # load_diff,
+        # load_arm
     ])
